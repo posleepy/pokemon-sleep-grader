@@ -24,7 +24,23 @@ const nat=id=>D.natures.find(n=>n.id===id)||D.natures.find(n=>n.id==="HARDY");
 const activeCount=l=>D.unlocks.filter(x=>x<=l).length;
 const SUBSKILL_IDS=new Set(D.subskills.map(x=>x.id));
 const NATURELESS_IDS=new Set(["MEW","DARKRAI"]);
+// Pokémon Sleep main-skill caps from the public RaenonX/Neroli data.
+// Signature variants have their own IDs even when they share a base skill.
+const SKILL_MAX_LEVELS=Object.freeze({
+ BerryBurst:6,BerryBurstDisguise:6,BerryBurstDracoMeteor:6,BerryZonePsystrike:6,
+ ChargeEnergyS:6,ChargeEnergySMoonlight:6,
+ ChargeStrengthM:7,ChargeStrengthMBadDreams:7,ChargeStrengthS:7,ChargeStrengthSRange:7,ChargeStrengthSStockpile:7,
+ CookingAssistS:7,CookingAssistSBulkUp:7,CookingPowerUpS:7,CookingPowerUpSMinus:7,
+ DreamShardMagnetS:8,DreamShardMagnetSAuraSphere:8,DreamShardMagnetSRange:8,
+ EnergizingCheerS:6,EnergizingCheerSHealPulse:6,EnergizingCheerSNuzzle:6,
+ EnergyForEveryoneS:6,EnergyForEveryoneSBerryJuice:6,EnergyForEveryoneSLunarBlessing:6,
+ ExtraHelpfulS:7,HelperBoost:6,
+ IngredientDrawSCutiefly:7,IngredientDrawSDwebble:7,IngredientDrawSHawlucha:7,IngredientDrawSHyperCutter:7,IngredientDrawSSandshrew:7,IngredientDrawSSuperLuck:7,
+ IngredientMagnetS:7,IngredientMagnetSPlusPlusle:7,IngredientMagnetSPlusToxtricity:7,IngredientMagnetSPresent:7,
+ Metronome:7,SkillCopy:7,SkillCopyMimic:7,SkillCopyTransform:7,TastyChanceS:6,Versatile:8
+});
 const hasNature=p=>!NATURELESS_IDS.has(typeof p==="string"?p:p?.id);
+const maxMainSkillLevel=p=>SKILL_MAX_LEVELS[(typeof p==="string"?mon(p):p)?.skill]||6;
 function placeSubskill(subskills,slot,id){
  if(!Array.isArray(subskills)||subskills.length!==D.unlocks.length||new Set(subskills).size!==subskills.length||subskills.some(x=>!SUBSKILL_IDS.has(x))||!Number.isInteger(slot)||slot<0||slot>=subskills.length||!SUBSKILL_IDS.has(id))throw Error("올바른 서브스킬 배열과 칸을 선택해 주세요.");
  const next=subskills.slice(),other=next.findIndex((x,i)=>i!==slot&&x===id),previous=next[slot];
@@ -83,10 +99,10 @@ function metrics(c,override){
  const berryStrengthDay=helps*(1-ingChance)*berryCount*berryValue*(c.favoriteBerry?2:1);
  const growth=1+.000000398*level**3+.000159*level**2+.00367*level-.00609;
  const ingredientStrengthDay=helps*ingChance*dropStrength*growth*ingRel;
- const bonus=(set.has("SLUM")?2:0)+(set.has("SLUS")?1:0),effectiveSkillLevel=clamp((+c.mainSkillLevel||1)+bonus,1,7);
- const levels=[1,1.24,1.53,1.86,2.23,2.63,3.06],skillProcsDay=helps*skillChance*skillRel,skillOutput=skillProcsDay*levels[effectiveSkillLevel-1];
+ const maxSkillLevel=maxMainSkillLevel(p),bonus=(set.has("SLUM")?2:0)+(set.has("SLUS")?1:0),effectiveSkillLevel=clamp((+c.mainSkillLevel||1)+bonus,1,maxSkillLevel);
+ const levels=[1,1.24,1.53,1.86,2.23,2.63,3.06,3.55],skillProcsDay=helps*skillChance*skillRel,skillOutput=skillProcsDay*levels[effectiveSkillLevel-1];
  let utilityIndex=1;if(set.has("ERB"))utilityIndex+=.045;if(set.has("SEB"))utilityIndex+=.06;if(set.has("DSB"))utilityIndex+=.035;if(set.has("REB"))utilityIndex+=.03;
- return{pokemon:p,role:role(p,c.versatileSkill),level,activeSubskills:[...set],interval,helpsPerDay:helps,ingredientChance:ingChance,skillChance,berryCount,inventory,fillHours,reliability:Math.min(ingRel,skillRel),berryStrengthDay,ingredientStrengthDay,skillProcsDay,skillOutput,effectiveSkillLevel,utilityIndex,teamSharedGain,chosenIngredients:sets};
+ return{pokemon:p,role:role(p,c.versatileSkill),level,activeSubskills:[...set],interval,helpsPerDay:helps,ingredientChance:ingChance,skillChance,berryCount,inventory,fillHours,reliability:Math.min(ingRel,skillRel),berryStrengthDay,ingredientStrengthDay,skillProcsDay,skillOutput,effectiveSkillLevel,maxSkillLevel,utilityIndex,teamSharedGain,chosenIngredients:sets};
 }
 function weights(p,c){
  const r=role(p,c?.versatileSkill);if(p.specialty==="berry")return{b:.8,i:.07,s:.08,u:.05,core:"b"};
@@ -193,7 +209,7 @@ function insights(c,report){
   if(n.up==="ingredient"&&p.specialty==="ingredient")good.push("식재료 상승 성격이 식재료 생산량을 직접 높입니다.");
   if(n.up==="neutral")good.push("무보정 성격이라 본업을 직접 깎는 성격 감점은 없습니다.");
  }
- if(m.effectiveSkillLevel>=7&&skillFocused)good.push("실효 메인 스킬이 최대 Lv.7이라 1회 발동 효과를 온전히 냅니다.");
+ if(m.effectiveSkillLevel>=m.maxSkillLevel&&skillFocused)good.push("실효 메인 스킬이 최대 Lv."+m.maxSkillLevel+"이라 1회 발동 효과를 온전히 냅니다.");
 
  let harmfulNature=false;
  if(hasNature(p)){
@@ -218,7 +234,7 @@ function insights(c,report){
   else if(skillFocused)coreGap(["STM","STS"],"core-skill","스킬 확률 업",90);
   coreGap(["HSM","HSS","HB"],"core-speed","속도 보정",72);
  }
- if(skillFocused&&m.effectiveSkillLevel<7)add(78-m.effectiveSkillLevel*2,"skill-level","실효 메인 스킬이 Lv."+m.effectiveSkillLevel+"이라 Lv.7 대비 1회 발동 효과가 낮습니다.");
+ if(skillFocused&&m.effectiveSkillLevel<m.maxSkillLevel)add(78-m.effectiveSkillLevel*2,"skill-level","실효 메인 스킬이 Lv."+m.effectiveSkillLevel+"이라 최대 Lv."+m.maxSkillLevel+" 대비 1회 발동 효과가 낮습니다.");
  if(berryImpact&&p.specialty!=="berry"&&(berryImpact.skillLossPct>=2||berryImpact.ingredientLossPct>=2)){
   const loss=skillFocused?berryImpact.skillLossPct:berryImpact.ingredientLossPct,label=skillFocused?"스킬 발동":"식재료 생산";
   if(loss>=2)add(82,"bfs-inventory","앱 확인 주기 "+c.collectionHours+"시간에서는 나무열매 수 S로 소지품이 약 "+berryImpact.fillHours.toFixed(1)+"시간 만에 차면서 "+label+"이 약 "+loss.toFixed(1)+"% 감소할 수 있습니다. 열매 이득도 있으니 확인 주기·소지수와 함께 보세요.");
@@ -241,5 +257,5 @@ function insights(c,report){
 }
 function analyze(c){const p=mon(c.pokemonId);if(!p)throw Error("올바른 포켓몬을 선택해 주세요.");const current=rank(c),futureConfig={...c,level:80},future=rank(futureConfig);return{pokemon:p,role:role(p,c.versatileSkill),current,future,metrics:metrics(c),futureMetrics:metrics(futureConfig),ingredientLine:ingredientRank(futureConfig),species:speciesRank(c),verdict:verdict(current.topPct)}}
 function defaultConfig(id="RALTS"){const p=mon(id)||D.pokemon[0];return{pokemonId:p.id,level:70,mainSkillLevel:1,natureId:"HARDY",subskills:["HB","STM","HSM","INVL","BFS"],ingredients:defaultIngredients(p),collectionHours:4,favoriteBerry:false,teamHelpingBonus:0,ingredientTarget:"",versatileSkill:"Metronome"}}
-root.SleepGraderEngine={analyze,metrics,getInsights:insights,getBerryFindingImpact:berryFindingImpact,placeSubskill,rankCandidate:rank,gradeFromTop:grade,getPokemon:mon,getNature:nat,getRole:role,getSkillRate:skillRate,hasNature,versatileOptions:VERSATILE_OPTIONS,defaultConfig,defaultIngredientIds:defaultIngredients,activeCount,version:"1.6.0"};
+root.SleepGraderEngine={analyze,metrics,getInsights:insights,getBerryFindingImpact:berryFindingImpact,placeSubskill,rankCandidate:rank,gradeFromTop:grade,getPokemon:mon,getNature:nat,getRole:role,getSkillRate:skillRate,getMaxMainSkillLevel:maxMainSkillLevel,hasNature,versatileOptions:VERSATILE_OPTIONS,defaultConfig,defaultIngredientIds:defaultIngredients,activeCount,version:"1.7.0"};
 })(globalThis);

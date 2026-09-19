@@ -39,6 +39,25 @@ test("Mew supports every Almighty main-skill choice from RaenonX",()=>{
   assert.ok(metronome.skillProcsDay>healer.skillProcsDay);
   assert.ok(healer.skillProcsDay>berry.skillProcsDay);
 });
+test("main-skill levels use the real Lv.6, Lv.7, and Lv.8 caps",()=>{
+  const examples={RALTS:6,SCEPTILE:6,AMPHAROS:7,DARKRAI:7,SABLEYE:8,LUCARIO:8,MEW:8};
+  for(const [id,max] of Object.entries(examples))assert.equal(E.getMaxMainSkillLevel(id),max,id);
+  for(const p of D.pokemon){
+    const max=E.getMaxMainSkillLevel(p);
+    assert.ok([6,7,8].includes(max),p.id+": "+max);
+    const m=E.metrics({...E.defaultConfig(p.id),level:80,mainSkillLevel:99});
+    assert.equal(m.maxSkillLevel,max,p.id);
+    assert.equal(m.effectiveSkillLevel,max,p.id);
+  }
+  const gardevoir={...E.defaultConfig("GARDEVOIR"),level:70,mainSkillLevel:6,subskills:["SLUM","HB","HSM","STM","INVL"]};
+  assert.equal(E.metrics(gardevoir).effectiveSkillLevel,6);
+  const mew=E.defaultConfig("MEW");
+  assert.ok(E.metrics({...mew,mainSkillLevel:8}).skillOutput>E.metrics({...mew,mainSkillLevel:7}).skillOutput);
+  const maxed={...gardevoir,subskills:["SLUM","REB","DSB","SEB","ERB"]};
+  assert.ok(E.getInsights(maxed,E.analyze(maxed)).good.some(x=>x.includes("최대 Lv.6")));
+  const lower={...gardevoir,mainSkillLevel:3,subskills:["HB","HSM","STM","INVL","REB"]};
+  assert.ok(E.getInsights(lower,E.analyze(lower)).bad.some(x=>x.includes("최대 Lv.6 대비")));
+});
 test("shortcomings react to nature, subskills, ingredients, and main-skill level",()=>{
   const base={...E.defaultConfig("RALTS"),level:70,mainSkillLevel:6,natureId:"HARDY",subskills:["HB","STM","HSM","INVL","REB"]};
   const good=E.analyze(base),goodNotes=E.getInsights(base,good).bad;

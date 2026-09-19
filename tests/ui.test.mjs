@@ -26,14 +26,14 @@ test("exact level and unlock-level shortcuts are present and cached for offline 
 });
 test("Helping Bonus team-model assumptions are visible and cached app files refresh",()=>{
   assert.doesNotMatch(html,/class="team-model-note"/);
-  assert.match(html,/src="app\.js\?v=10" defer/);
-  assert.match(html,/src="engine\.js\?v=10" defer/);
+  assert.match(html,/src="app\.js\?v=11" defer/);
+  assert.match(html,/src="engine\.js\?v=11" defer/);
   assert.match(app,/<p class="team-footnote">도우미 보너스의 팀 가치는 팀원 4마리/);
   assert.match(css,/\.result-footnote \.team-footnote\{[^}]*font-size:inherit/);
   assert.match(html,/35% 상한/);
-  assert.match(serviceWorker,/pokemon-sleep-grader-v10/);
-  assert.match(serviceWorker,/"\.\/engine\.js\?v=10"/);
-  assert.match(serviceWorker,/"\.\/app\.js\?v=10"/);
+  assert.match(serviceWorker,/pokemon-sleep-grader-v11/);
+  assert.match(serviceWorker,/"\.\/engine\.js\?v=11"/);
+  assert.match(serviceWorker,/"\.\/app\.js\?v=11"/);
 });
 
 function appHarness(){
@@ -95,6 +95,32 @@ test("Mew and Darkrai display no nature and omit nature comparisons",()=>{
   assert.equal(nature.disabled,false);
   assert.equal(nature.options.length,25);
   assert.equal(note.hidden,true);
+});
+
+test("main-skill choices follow each Pokémon's actual level cap",()=>{
+  const ui=appHarness(),search=ui.elements.pokemonSearch,skill=ui.elements.mainSkillLevel;
+  assert.equal(ui.getSaved().pokemonId,"RALTS");
+  assert.equal(skill.options.length,6);
+  assert.equal(skill.options.at(-1).text,"Lv.6 · 최대");
+  assert.match(ui.elements.pokemonMeta.innerHTML,/최대 Lv\.6/);
+
+  search.value="뮤";search.fire("change");
+  assert.equal(skill.options.length,8);
+  assert.equal(skill.options.at(-1).text,"Lv.8 · 최대");
+  skill.value="8";skill.fire("change");
+  assert.equal(ui.getSaved().mainSkillLevel,8);
+  assert.match(ui.elements.pokemonMeta.innerHTML,/올마이티[\s\S]*최대 Lv\.8/);
+
+  search.value="다크라이";search.fire("change");
+  assert.equal(skill.options.length,7);
+  assert.equal(ui.getSaved().mainSkillLevel,7);
+  assert.equal(skill.options.at(-1).text,"Lv.7 · 최대");
+
+  search.value="랄토스";search.fire("change");
+  assert.equal(skill.options.length,6);
+  assert.equal(ui.getSaved().mainSkillLevel,6);
+  ui.renderPending();
+  assert.match(ui.elements.resultContent.innerHTML,/실효 메인 스킬:<\/strong> Lv\.6 \/ 최대 Lv\.6/);
 });
 
 test("changing Pokémon never requires erasing the previously selected name",()=>{
