@@ -4,10 +4,22 @@ await import("../data.js");
 await import("../engine.js");
 const D=globalThis.PSG_DATA,E=globalThis.SleepGraderEngine;
 
-test("247 Pokémon records are complete and unique",()=>{
-  assert.equal(D.pokemon.length,247);
-  assert.equal(new Set(D.pokemon.map(p=>p.id)).size,247);
+test("249 Pokémon records are complete and unique",()=>{
+  assert.equal(D.pokemon.length,249);
+  assert.equal(new Set(D.pokemon.map(p=>p.id)).size,249);
   for(const p of D.pokemon){assert.ok(p.frequency>0,p.id);assert.ok(p.ingredients["0"].length,p.id);assert.ok(p.skill,p.id)}
+});
+test("Foongus and Amoonguss match the 2026-10-05 RaenonX snapshot",()=>{
+  const foongus=E.getPokemon("FOONGUS"),amoonguss=E.getPokemon("AMOONGUSS");
+  assert.deepEqual({specialty:foongus.specialty,frequency:foongus.frequency,carry:foongus.carrySize,ingredient:foongus.ingredientPercentage,skill:foongus.skillPercentage},
+    {specialty:"ingredient",frequency:5700,carry:12,ingredient:17.4,skill:3.5});
+  assert.deepEqual({specialty:amoonguss.specialty,frequency:amoonguss.frequency,carry:amoonguss.carrySize,ingredient:amoonguss.ingredientPercentage,skill:amoonguss.skillPercentage},
+    {specialty:"ingredient",frequency:3500,carry:14,ingredient:20.4,skill:4.7});
+  assert.equal(foongus.skill,"ChargeStrengthSRange");
+  assert.equal(E.getMaxMainSkillLevel(foongus),7);
+  assert.deepEqual(amoonguss.ingredients["60"].map(x=>[x.id,x.amount]),[["TASTY_MUSHROOM",7],["FANCY_EGG",10],["SNOOZY_TOMATO",11]]);
+  assert.equal(D.ingredients.TASTY_MUSHROOM.ko,"풍미버섯");
+  assert.equal(D.ingredients.ROUSING_COFFEE.ko,"각성원두");
 });
 test("helping speed and Berry Finding S affect output",()=>{
   const r=E.defaultConfig("RALTS");r.level=50;r.subskills=["REB","DSB","SEB","ERB","INVS"];const slow=E.metrics(r);r.subskills=["HSM","DSB","SEB","ERB","INVS"];assert.ok(E.metrics(r).helpsPerDay>slow.helpsPerDay);
@@ -19,7 +31,7 @@ test("a role-correct Ralts outranks a bad healer",()=>{
   const a=E.analyze(good),b=E.analyze(bad);assert.ok(a.current.topPct<b.current.topPct);assert.ok(a.current.topPct<15);assert.ok(b.current.topPct>85);assert.equal(a.species.basisPokemon.id,"GARDEVOIR");
 });
 test("representative outputs are finite",()=>{
-  for(const id of["GARDEVOIR","TORTERRA","SCEPTILE","MEW","MEWTWO"]){const r=E.analyze(E.defaultConfig(id));assert.ok(Number.isFinite(r.current.topPct),id)}
+  for(const id of["GARDEVOIR","TORTERRA","SCEPTILE","MEW","MEWTWO","FOONGUS","AMOONGUSS"]){const r=E.analyze(E.defaultConfig(id));assert.ok(Number.isFinite(r.current.topPct),id)}
 });
 test("Mew supports every Almighty main-skill choice from RaenonX",()=>{
   assert.equal(E.versatileOptions.length,12);

@@ -26,14 +26,16 @@ test("exact level and unlock-level shortcuts are present and cached for offline 
 });
 test("Helping Bonus team-model assumptions are visible and cached app files refresh",()=>{
   assert.doesNotMatch(html,/class="team-model-note"/);
-  assert.match(html,/src="app\.js\?v=11" defer/);
-  assert.match(html,/src="engine\.js\?v=11" defer/);
+  assert.match(html,/src="data\.js\?v=12" defer/);
+  assert.match(html,/src="app\.js\?v=12" defer/);
+  assert.match(html,/src="engine\.js\?v=12" defer/);
   assert.match(app,/<p class="team-footnote">도우미 보너스의 팀 가치는 팀원 4마리/);
   assert.match(css,/\.result-footnote \.team-footnote\{[^}]*font-size:inherit/);
   assert.match(html,/35% 상한/);
-  assert.match(serviceWorker,/pokemon-sleep-grader-v11/);
-  assert.match(serviceWorker,/"\.\/engine\.js\?v=11"/);
-  assert.match(serviceWorker,/"\.\/app\.js\?v=11"/);
+  assert.match(serviceWorker,/pokemon-sleep-grader-v12/);
+  assert.match(serviceWorker,/"\.\/data\.js\?v=12"/);
+  assert.match(serviceWorker,/"\.\/engine\.js\?v=12"/);
+  assert.match(serviceWorker,/"\.\/app\.js\?v=12"/);
 });
 
 function appHarness(){
