@@ -21,6 +21,13 @@ test("Foongus and Amoonguss match the 2026-10-05 RaenonX snapshot",()=>{
   assert.equal(D.ingredients.TASTY_MUSHROOM.ko,"풍미버섯");
   assert.equal(D.ingredients.ROUSING_COFFEE.ko,"각성원두");
 });
+test("version 3.9.0 Gengar adjustment and Halloween Eevee label are current",()=>{
+  const gengar=E.getPokemon("GENGAR"),halloweenEevee=E.getPokemon("EEVEE_HALLOWEEN");
+  assert.equal(D.version,"2026-10-24");
+  assert.equal(gengar.ingredientPercentage,16.6);
+  assert.equal(halloweenEevee.ko,"이브이(핼러윈)");
+  assert.equal(halloweenEevee.remainingEvolutions,0);
+});
 test("helping speed and Berry Finding S affect output",()=>{
   const r=E.defaultConfig("RALTS");r.level=50;r.subskills=["REB","DSB","SEB","ERB","INVS"];const slow=E.metrics(r);r.subskills=["HSM","DSB","SEB","ERB","INVS"];assert.ok(E.metrics(r).helpsPerDay>slow.helpsPerDay);
   const s=E.defaultConfig("SCEPTILE");s.level=10;s.subskills=["REB","DSB","SEB","ERB","INVS"];const plain=E.metrics(s);s.subskills=["BFS","DSB","SEB","ERB","INVS"];const bfs=E.metrics(s);assert.equal(bfs.berryCount,plain.berryCount+1);assert.ok(bfs.berryStrengthDay>plain.berryStrengthDay);
@@ -171,3 +178,4 @@ test("Mew and Darkrai have no nature modifiers or nature advice",()=>{
   const r=E.defaultConfig("RALTS");
   assert.notEqual(E.metrics({...r,natureId:"CALM"}).helpsPerDay,E.metrics(r).helpsPerDay);
 });
+

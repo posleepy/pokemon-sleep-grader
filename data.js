@@ -1,10 +1,10 @@
 /* Pokémon Sleep public-stat snapshot. See THIRD_PARTY_NOTICES.md. */
 globalThis.PSG_DATA={
-  "version": "2026-10-05",
+  "version": "2026-10-24",
   "source": {
     "raenonx": "https://pks.raenonx.cc/kr",
-    "raenonxCheckedAt": "2026-10-05",
-    "neroliCommit": "ef1b1e6ce11ea809bef7b9a7249f574b1eb43561"
+    "raenonxCheckedAt": "2026-10-24",
+    "neroliCommit": "b52bc32138ab834477b5cad70a25a952474f5f3a"
   },
   "unlocks": [
     10,
@@ -5338,7 +5338,7 @@ globalThis.PSG_DATA={
       "id": "GENGAR",
       "specialty": "ingredient",
       "pokedexNumber": 94,
-      "ingredientPercentage": 16.1,
+      "ingredientPercentage": 16.6,
       "skillPercentage": 2.4,
       "carrySize": 18,
       "previousEvolutions": 2,
@@ -9654,7 +9654,7 @@ globalThis.PSG_DATA={
         ]
       },
       "en": "Eevee (Halloween)",
-      "ko": "이브이"
+      "ko": "이브이(핼러윈)"
     },
     {
       "id": "VAPOREON",
@@ -13767,3 +13767,4 @@ globalThis.PSG_DATA={
     }
   ]
 };
+
