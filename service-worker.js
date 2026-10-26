@@ -1,14 +1,14 @@
 "use strict";
 
-const CACHE_NAME="pokemon-sleep-grader-v13";
+const CACHE_NAME="pokemon-sleep-grader-v14";
 const APP_SHELL=[
   "./",
   "./index.html",
   "./styles.css",
   "./ui.css?v=9",
-  "./data.js?v=13",
-  "./engine.js?v=13",
-  "./app.js?v=13",
+  "./data.js?v=14",
+  "./engine.js?v=14",
+  "./app.js?v=14",
   "./manifest.webmanifest",
   "./favicon.svg",
   "./icon-192.png",
@@ -54,4 +54,5 @@ self.addEventListener("fetch",event=>{
     }
   })());
 });
+
 

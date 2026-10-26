@@ -2,7 +2,7 @@
 
 ## Neroli’s Lab
 
-The helper-stat snapshot in **data.js** was generated from public data in [nerolis-lab/nerolis-lab](https://github.com/nerolis-lab/nerolis-lab), commit **52157cbf6b43d15517f0051c80c70121e76e0d7a**.
+The base helper-stat snapshot in **data.js** was generated from public data in [nerolis-lab/nerolis-lab](https://github.com/nerolis-lab/nerolis-lab), commit **b52bc32138ab834477b5cad70a25a952474f5f3a**. Newly released records and later balance changes are manually cross-checked against the official Pokémon Sleep announcements and RaenonX.
 
 Copyright 2025 Neroli’s Lab Authors. Licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
@@ -15,3 +15,4 @@ Changes include compact serialization, Korean display names, ingredient normaliz
 ## Pokémon
 
 Pokémon and Pokémon Sleep are trademarks of their respective owners. This unofficial fan tool contains no Pokémon artwork, sprites or official logos.
+

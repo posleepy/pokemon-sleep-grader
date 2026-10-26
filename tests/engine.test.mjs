@@ -4,9 +4,9 @@ await import("../data.js");
 await import("../engine.js");
 const D=globalThis.PSG_DATA,E=globalThis.SleepGraderEngine;
 
-test("249 Pokémon records are complete and unique",()=>{
-  assert.equal(D.pokemon.length,249);
-  assert.equal(new Set(D.pokemon.map(p=>p.id)).size,249);
+test("251 Pokémon records are complete and unique",()=>{
+  assert.equal(D.pokemon.length,251);
+  assert.equal(new Set(D.pokemon.map(p=>p.id)).size,251);
   for(const p of D.pokemon){assert.ok(p.frequency>0,p.id);assert.ok(p.ingredients["0"].length,p.id);assert.ok(p.skill,p.id)}
 });
 test("Foongus and Amoonguss match the 2026-10-05 RaenonX snapshot",()=>{
@@ -23,10 +23,28 @@ test("Foongus and Amoonguss match the 2026-10-05 RaenonX snapshot",()=>{
 });
 test("version 3.9.0 Gengar adjustment and Halloween Eevee label are current",()=>{
   const gengar=E.getPokemon("GENGAR"),halloweenEevee=E.getPokemon("EEVEE_HALLOWEEN");
-  assert.equal(D.version,"2026-10-24");
+  assert.equal(D.version,"2026-10-26");
   assert.equal(gengar.ingredientPercentage,16.6);
   assert.equal(halloweenEevee.ko,"이브이(핼러윈)");
   assert.equal(halloweenEevee.remainingEvolutions,0);
+});
+test("Misdreavus and Mismagius match the 2026-10-26 release data",()=>{
+  const misdreavus=E.getPokemon("MISDREAVUS"),mismagius=E.getPokemon("MISMAGIUS");
+  assert.deepEqual({specialty:misdreavus.specialty,frequency:misdreavus.frequency,carry:misdreavus.carrySize,ingredient:misdreavus.ingredientPercentage,skill:misdreavus.skillPercentage},
+    {specialty:"skill",frequency:2800,carry:13,ingredient:15,skill:4.7});
+  assert.deepEqual({specialty:mismagius.specialty,frequency:mismagius.frequency,carry:mismagius.carrySize,ingredient:mismagius.ingredientPercentage,skill:mismagius.skillPercentage},
+    {specialty:"skill",frequency:2400,carry:17,ingredient:14.2,skill:3.6});
+  assert.equal(misdreavus.skill,"CookingPowerUpS");
+  assert.equal(mismagius.skill,"CookingAdvanceSMysticalFire");
+  assert.equal(E.getRole(misdreavus).skillName,"요리 파워 업S");
+  assert.deepEqual(E.getRole(mismagius),{category:"cooking",label:"복합 요리 지원형",skillName:"매지컬플레임(요리 어드밴스S)",specialtyLabel:"스킬 타입",selectedSkill:"CookingAdvanceSMysticalFire",isVersatile:false});
+  assert.equal(E.getMaxMainSkillLevel(mismagius),7);
+  assert.deepEqual(mismagius.ingredients["30"].map(x=>[x.id,x.amount]),[["SOFT_POTATO",2],["ROUSING_COFFEE",2]]);
+  assert.deepEqual(mismagius.ingredients["60"].map(x=>[x.id,x.amount]),[["SOFT_POTATO",4],["ROUSING_COFFEE",3],["SNOOZY_TOMATO",4]]);
+  const lv1=E.metrics({...E.defaultConfig("MISMAGIUS"),mainSkillLevel:1}),lv7=E.metrics({...E.defaultConfig("MISMAGIUS"),mainSkillLevel:7});
+  assert.deepEqual(lv1.mainSkillEffect,{pot:7,extraTasty:1});
+  assert.deepEqual(lv7.mainSkillEffect,{pot:31,extraTasty:5});
+  assert.equal(E.analyze(E.defaultConfig("MISDREAVUS")).species.basisPokemon.id,"MISMAGIUS");
 });
 test("helping speed and Berry Finding S affect output",()=>{
   const r=E.defaultConfig("RALTS");r.level=50;r.subskills=["REB","DSB","SEB","ERB","INVS"];const slow=E.metrics(r);r.subskills=["HSM","DSB","SEB","ERB","INVS"];assert.ok(E.metrics(r).helpsPerDay>slow.helpsPerDay);
@@ -38,7 +56,7 @@ test("a role-correct Ralts outranks a bad healer",()=>{
   const a=E.analyze(good),b=E.analyze(bad);assert.ok(a.current.topPct<b.current.topPct);assert.ok(a.current.topPct<15);assert.ok(b.current.topPct>85);assert.equal(a.species.basisPokemon.id,"GARDEVOIR");
 });
 test("representative outputs are finite",()=>{
-  for(const id of["GARDEVOIR","TORTERRA","SCEPTILE","MEW","MEWTWO","FOONGUS","AMOONGUSS"]){const r=E.analyze(E.defaultConfig(id));assert.ok(Number.isFinite(r.current.topPct),id)}
+  for(const id of["GARDEVOIR","TORTERRA","SCEPTILE","MEW","MEWTWO","FOONGUS","AMOONGUSS","MISDREAVUS","MISMAGIUS"]){const r=E.analyze(E.defaultConfig(id));assert.ok(Number.isFinite(r.current.topPct),id)}
 });
 test("Mew supports every Almighty main-skill choice from RaenonX",()=>{
   assert.equal(E.versatileOptions.length,12);
@@ -59,7 +77,7 @@ test("Mew supports every Almighty main-skill choice from RaenonX",()=>{
   assert.ok(healer.skillProcsDay>berry.skillProcsDay);
 });
 test("main-skill levels use the real Lv.6, Lv.7, and Lv.8 caps",()=>{
-  const examples={RALTS:6,SCEPTILE:6,AMPHAROS:7,DARKRAI:7,SABLEYE:8,LUCARIO:8,MEW:8};
+  const examples={RALTS:6,SCEPTILE:6,AMPHAROS:7,DARKRAI:7,MISMAGIUS:7,SABLEYE:8,LUCARIO:8,MEW:8};
   for(const [id,max] of Object.entries(examples))assert.equal(E.getMaxMainSkillLevel(id),max,id);
   for(const p of D.pokemon){
     const max=E.getMaxMainSkillLevel(p);
@@ -178,4 +196,5 @@ test("Mew and Darkrai have no nature modifiers or nature advice",()=>{
   const r=E.defaultConfig("RALTS");
   assert.notEqual(E.metrics({...r,natureId:"CALM"}).helpsPerDay,E.metrics(r).helpsPerDay);
 });
+
 

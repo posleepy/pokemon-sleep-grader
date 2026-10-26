@@ -30,7 +30,7 @@ const SKILL_MAX_LEVELS=Object.freeze({
  BerryBurst:6,BerryBurstDisguise:6,BerryBurstDracoMeteor:6,BerryZonePsystrike:6,
  ChargeEnergyS:6,ChargeEnergySMoonlight:6,
  ChargeStrengthM:7,ChargeStrengthMBadDreams:7,ChargeStrengthS:7,ChargeStrengthSRange:7,ChargeStrengthSStockpile:7,
- CookingAssistS:7,CookingAssistSBulkUp:7,CookingPowerUpS:7,CookingPowerUpSMinus:7,
+ CookingAdvanceSMysticalFire:7,CookingAssistS:7,CookingAssistSBulkUp:7,CookingPowerUpS:7,CookingPowerUpSMinus:7,
  DreamShardMagnetS:8,DreamShardMagnetSAuraSphere:8,DreamShardMagnetSRange:8,
  EnergizingCheerS:6,EnergizingCheerSHealPulse:6,EnergizingCheerSNuzzle:6,
  EnergyForEveryoneS:6,EnergyForEveryoneSBerryJuice:6,EnergyForEveryoneSLunarBlessing:6,
@@ -39,6 +39,10 @@ const SKILL_MAX_LEVELS=Object.freeze({
  IngredientMagnetS:7,IngredientMagnetSPlusPlusle:7,IngredientMagnetSPlusToxtricity:7,IngredientMagnetSPresent:7,
  Metronome:7,SkillCopy:7,SkillCopyMimic:7,SkillCopyTransform:7,TastyChanceS:6,Versatile:8
 });
+const COOKING_ADVANCE_EFFECTS=Object.freeze([
+ {pot:7,extraTasty:1},{pot:10,extraTasty:2},{pot:12,extraTasty:2},{pot:17,extraTasty:3},
+ {pot:22,extraTasty:3},{pot:27,extraTasty:4},{pot:31,extraTasty:5}
+]);
 const hasNature=p=>!NATURELESS_IDS.has(typeof p==="string"?p:p?.id);
 const maxMainSkillLevel=p=>SKILL_MAX_LEVELS[(typeof p==="string"?mon(p):p)?.skill]||6;
 function placeSubskill(subskills,slot,id){
@@ -56,6 +60,7 @@ function role(p,versatileSkill){
  else if(/BerryBurst/.test(s)){category="berrySkill";label="나무열매 폭발형";skillName=/DracoMeteor/.test(s)?"용성군":/Disguise/.test(s)?"탈·나무열매 버스트":"나무열매 버스트"}
  else if(/IngredientMagnet/.test(s)){category="ingredientSkill";label="식재료 수급형";skillName="식재료 획득S"}
  else if(/IngredientDraw/.test(s)){category="ingredientSkill";label="식재료 선택형";skillName="식재료 셀렉트S"}
+ else if(/CookingAdvance/.test(s)){category="cooking";label="복합 요리 지원형";skillName="매지컬플레임(요리 어드밴스S)"}
  else if(/CookingPowerUp/.test(s)){category="cooking";label="냄비 확장형";skillName="요리 파워 업S"}
  else if(/CookingAssist/.test(s)){category="cooking";label="요리 지원형";skillName="요리 서포트S"}
  else if(/TastyChance/.test(s)){category="cooking";label="대성공 지원형";skillName="요리 대성공S"}
@@ -101,8 +106,9 @@ function metrics(c,override){
  const ingredientStrengthDay=helps*ingChance*dropStrength*growth*ingRel;
  const maxSkillLevel=maxMainSkillLevel(p),bonus=(set.has("SLUM")?2:0)+(set.has("SLUS")?1:0),effectiveSkillLevel=clamp((+c.mainSkillLevel||1)+bonus,1,maxSkillLevel);
  const levels=[1,1.24,1.53,1.86,2.23,2.63,3.06,3.55],skillProcsDay=helps*skillChance*skillRel,skillOutput=skillProcsDay*levels[effectiveSkillLevel-1];
+ const mainSkillEffect=p.skill==="CookingAdvanceSMysticalFire"?COOKING_ADVANCE_EFFECTS[effectiveSkillLevel-1]:null;
  let utilityIndex=1;if(set.has("ERB"))utilityIndex+=.045;if(set.has("SEB"))utilityIndex+=.06;if(set.has("DSB"))utilityIndex+=.035;if(set.has("REB"))utilityIndex+=.03;
- return{pokemon:p,role:role(p,c.versatileSkill),level,activeSubskills:[...set],interval,helpsPerDay:helps,ingredientChance:ingChance,skillChance,berryCount,inventory,fillHours,reliability:Math.min(ingRel,skillRel),berryStrengthDay,ingredientStrengthDay,skillProcsDay,skillOutput,effectiveSkillLevel,maxSkillLevel,utilityIndex,teamSharedGain,chosenIngredients:sets};
+ return{pokemon:p,role:role(p,c.versatileSkill),level,activeSubskills:[...set],interval,helpsPerDay:helps,ingredientChance:ingChance,skillChance,berryCount,inventory,fillHours,reliability:Math.min(ingRel,skillRel),berryStrengthDay,ingredientStrengthDay,skillProcsDay,skillOutput,effectiveSkillLevel,maxSkillLevel,mainSkillEffect,utilityIndex,teamSharedGain,chosenIngredients:sets};
 }
 function weights(p,c){
  const r=role(p,c?.versatileSkill);if(p.specialty==="berry")return{b:.8,i:.07,s:.08,u:.05,core:"b"};
@@ -140,7 +146,7 @@ function upper(a,v){let l=0,h=a.length;while(l<h){const m=l+h>>>1;if(a[m]<=v)l=m
 function grade(x){return x<=1?"S+":x<=5?"S":x<=12?"A+":x<=22?"A":x<=35?"B+":x<=50?"B":x<=65?"C+":x<=80?"C":x<=92?"D":"E"}
 function rank(c){const sc=scorer(c),v=sc.score(c),a=distribution(c),e=Math.max(1e-10,Math.abs(v)*1e-9),lo=lower(a,v-e),hi=upper(a,v+e),top=clamp(((a.length-hi)+(hi-lo)*.5)/a.length*100,.1,99.9);return{topPct:top,grade:grade(top),score:v,samples:a.length,indices:sc.indices(c)}}
 function ingredientRank(c){const p=mon(c.pokemonId),sc=scorer(c),keys=[["0",1],["30",30],["60",60]].filter(x=>c.level>=x[1]).map(x=>x[0]),a=[];function walk(i,x){if(i===keys.length){a.push(sc.score({...c,ingredients:{...c.ingredients,...x}}));return}const k=keys[i];(p.ingredients[k]||[]).forEach(o=>walk(i+1,{...x,[k]:o.id}))}walk(0,{});a.sort((x,y)=>x-y);const v=sc.score(c),lo=lower(a,v-1e-9),hi=upper(a,v+1e-9),top=a.length<=1?50:((a.length-hi)+(hi-lo)*.5)/a.length*100;return{topPct:clamp(top,.1,99.9),combinations:a.length}}
-function finalMon(p){if(!p||p.remainingEvolutions===0)return p;const i=p.ingredients["0"]?.[0]?.id;return D.pokemon.filter(x=>x.remainingEvolutions===0&&x.specialty===p.specialty&&x.skill===p.skill&&x.pokedexNumber>=p.pokedexNumber&&x.pokedexNumber<=p.pokedexNumber+20&&x.ingredients["0"]?.[0]?.id===i).sort((a,b)=>a.pokedexNumber-b.pokedexNumber)[0]||p}
+function finalMon(p){if(!p||p.remainingEvolutions===0)return p;if(p.finalEvolutionId)return mon(p.finalEvolutionId)||p;const i=p.ingredients["0"]?.[0]?.id;return D.pokemon.filter(x=>x.remainingEvolutions===0&&x.specialty===p.specialty&&x.skill===p.skill&&x.pokedexNumber>=p.pokedexNumber&&x.pokedexNumber<=p.pokedexNumber+20&&x.ingredients["0"]?.[0]?.id===i).sort((a,b)=>a.pokedexNumber-b.pokedexNumber)[0]||p}
 function scalar(m,s,c){if(s==="berry")return m.berryStrengthDay+m.ingredientStrengthDay*.08;if(s==="ingredient")return m.ingredientStrengthDay+m.berryStrengthDay*.08;if(s==="all")return m.berryStrengthDay+m.ingredientStrengthDay+m.skillOutput*6000;if(c==="berrySkill")return m.skillOutput*.68+m.berryStrengthDay/15000*.32;if(c==="ingredientSkill")return m.skillOutput*.72+m.ingredientStrengthDay/12000*.28;return m.skillOutput}
 function speciesRank(c){const entered=mon(c.pokemonId),p=finalMon(entered),r=role(p,c.versatileSkill),group=D.pokemon.filter(x=>x.remainingEvolutions===0&&x.specialty===p.specialty&&((p.specialty!=="skill"&&p.specialty!=="all")||role(x,c.versatileSkill).category===r.category));const val=x=>{const z={...c,pokemonId:x.id,natureId:"HARDY",subskills:filler(),ingredients:defaultIngredients(x)};return scalar(metrics(z),x.specialty,role(x,c.versatileSkill).category)},a=group.map(val).sort((x,y)=>x-y),v=val(p),lo=lower(a,v-1e-9),hi=upper(a,v+1e-9),top=a.length<=1?50:((a.length-hi)+(hi-lo)*.5)/a.length*100;return{topPct:clamp(top,.1,99.9),count:a.length,basisPokemon:p,role:r}}
 function verdict(x){return x<=1?{title:"종결급",text:"더 좋은 개체를 기다릴 이유가 거의 없습니다. 바로 투자해도 됩니다."}:x<=5?{title:"최상급",text:"메인 스킬 씨앗까지 투자할 가치가 높은 개체입니다."}:x<=12?{title:"상급",text:"본업 핵심 옵션이 잘 모였습니다. 적극 육성권입니다."}:x<=22?{title:"준수한 상급",text:"실전에서 오래 쓸 수 있습니다. 역할에 맞으면 투자해도 좋습니다."}:x<=35?{title:"쓸 만함",text:"분명 평균 이상이지만 종결 개체는 아닙니다. 자원이 넉넉하면 육성하세요."}:x<=50?{title:"평균 이상",text:"당장 쓸 수는 있으나 비싼 씨앗 투자는 한 번 더 생각하는 편이 낫습니다."}:x<=65?{title:"평범함",text:"임시 사용은 가능하지만 장기 투자 대상으로는 애매합니다."}:x<=80?{title:"아쉬움",text:"본업 옵션이 부족합니다. 대체 개체를 계속 찾는 편이 좋습니다."}:{title:"교체 후보",text:"솔직히 고투자는 손해에 가깝습니다. 최소 투자로만 쓰세요."}}
@@ -257,5 +263,6 @@ function insights(c,report){
 }
 function analyze(c){const p=mon(c.pokemonId);if(!p)throw Error("올바른 포켓몬을 선택해 주세요.");const current=rank(c),futureConfig={...c,level:80},future=rank(futureConfig);return{pokemon:p,role:role(p,c.versatileSkill),current,future,metrics:metrics(c),futureMetrics:metrics(futureConfig),ingredientLine:ingredientRank(futureConfig),species:speciesRank(c),verdict:verdict(current.topPct)}}
 function defaultConfig(id="RALTS"){const p=mon(id)||D.pokemon[0];return{pokemonId:p.id,level:70,mainSkillLevel:1,natureId:"HARDY",subskills:["HB","STM","HSM","INVL","BFS"],ingredients:defaultIngredients(p),collectionHours:4,favoriteBerry:false,teamHelpingBonus:0,ingredientTarget:"",versatileSkill:"Metronome"}}
-root.SleepGraderEngine={analyze,metrics,getInsights:insights,getBerryFindingImpact:berryFindingImpact,placeSubskill,rankCandidate:rank,gradeFromTop:grade,getPokemon:mon,getNature:nat,getRole:role,getSkillRate:skillRate,getMaxMainSkillLevel:maxMainSkillLevel,hasNature,versatileOptions:VERSATILE_OPTIONS,defaultConfig,defaultIngredientIds:defaultIngredients,activeCount,version:"1.7.0"};
+root.SleepGraderEngine={analyze,metrics,getInsights:insights,getBerryFindingImpact:berryFindingImpact,placeSubskill,rankCandidate:rank,gradeFromTop:grade,getPokemon:mon,getNature:nat,getRole:role,getSkillRate:skillRate,getMaxMainSkillLevel:maxMainSkillLevel,hasNature,versatileOptions:VERSATILE_OPTIONS,defaultConfig,defaultIngredientIds:defaultIngredients,activeCount,version:"1.8.0"};
 })(globalThis);
+

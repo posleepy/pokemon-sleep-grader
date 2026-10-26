@@ -4,14 +4,15 @@
 
 ## 바로 사용
 
-- **즉시 실행:** https://raw.githack.com/posleepy/pokemon-sleep-grader/main/index.html
+- **즉시 실행:** https://raw.githack.com/posleepy/pokemon-sleep-grader/main/index.html?v=14
 - **GitHub Pages(활성화 후):** https://posleepy.github.io/pokemon-sleep-grader/
 - **RaenonX 교차 확인:** https://pks.raenonx.cc/kr/rating
 
 ## 주요 기능
 
-- 2026-10-24 공개 데이터 기준 249종 검색(깜놀버슬·뽀록나·이브이(핼러윈) 포함)
+- 2026-10-26 공개 데이터 기준 251종 검색(무우마·무우마직 포함)
 - Ver.3.9.0의 팬텀 식재료 확률 상향(16.1% → 16.6%) 반영
+- 무우마의 요리 파워 업S와 진화 후 무우마직의 매지컬플레임(요리 어드밴스S)을 구분하고, 스킬 레벨별 냄비·대성공 효과 반영
 - 선택한 포켓몬을 유지하며 검색칸에 다음 포켓몬 이름을 바로 입력
 - 레벨 직접 입력 또는 Lv.1·10·25·30·50·60·70·80 버튼으로 즉시 설정
 - 현재 미적용 칸까지 모든 서브스킬 편집, 이미 있는 스킬을 선택하면 두 레벨 칸의 위치를 교환
@@ -56,4 +57,5 @@ Node.js 20 이상에서 `node --test`를 실행합니다. main 브랜치에 푸�
 확인 기준과 포켓몬별 링크는 [RaenonX 포켓몬 슬립 위키](https://pks.raenonx.cc/kr)를 사용합니다. 자동 계산용 기본 수치 스냅샷은 Apache-2.0 공개 프로젝트 [Neroli’s Lab](https://github.com/nerolis-lab/nerolis-lab)의 데이터를 사용했습니다. 자세한 내용은 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)를 확인하세요.
 
 RaenonX 및 Pokémon 권리자들과 제휴되지 않은 비공식 팬 도구이며, 게임 이미지·공식 로고는 포함하지 않습니다.
+
 

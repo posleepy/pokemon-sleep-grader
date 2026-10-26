@@ -26,16 +26,16 @@ test("exact level and unlock-level shortcuts are present and cached for offline 
 });
 test("Helping Bonus team-model assumptions are visible and cached app files refresh",()=>{
   assert.doesNotMatch(html,/class="team-model-note"/);
-  assert.match(html,/src="data\.js\?v=13" defer/);
-  assert.match(html,/src="app\.js\?v=13" defer/);
-  assert.match(html,/src="engine\.js\?v=13" defer/);
+  assert.match(html,/src="data\.js\?v=14" defer/);
+  assert.match(html,/src="app\.js\?v=14" defer/);
+  assert.match(html,/src="engine\.js\?v=14" defer/);
   assert.match(app,/<p class="team-footnote">도우미 보너스의 팀 가치는 팀원 4마리/);
   assert.match(css,/\.result-footnote \.team-footnote\{[^}]*font-size:inherit/);
   assert.match(html,/35% 상한/);
-  assert.match(serviceWorker,/pokemon-sleep-grader-v13/);
-  assert.match(serviceWorker,/"\.\/data\.js\?v=13"/);
-  assert.match(serviceWorker,/"\.\/engine\.js\?v=13"/);
-  assert.match(serviceWorker,/"\.\/app\.js\?v=13"/);
+  assert.match(serviceWorker,/pokemon-sleep-grader-v14/);
+  assert.match(serviceWorker,/"\.\/data\.js\?v=14"/);
+  assert.match(serviceWorker,/"\.\/engine\.js\?v=14"/);
+  assert.match(serviceWorker,/"\.\/app\.js\?v=14"/);
 });
 
 function appHarness(){
@@ -125,6 +125,23 @@ test("main-skill choices follow each Pokémon's actual level cap",()=>{
   assert.match(ui.elements.resultContent.innerHTML,/실효 메인 스킬:<\/strong> Lv\.6 \/ 최대 Lv\.6/);
 });
 
+test("Mismagius exposes its evolved main skill and selected-level effects",()=>{
+  const ui=appHarness(),search=ui.elements.pokemonSearch,skill=ui.elements.mainSkillLevel;
+  search.value="무우마직";search.fire("change");
+  assert.equal(ui.getSaved().pokemonId,"MISMAGIUS");
+  assert.equal(skill.options.length,7);
+  assert.match(ui.elements.pokemonMeta.innerHTML,/매지컬플레임\(요리 어드밴스S\) · 최대 Lv\.7/);
+  skill.value="7";skill.fire("change");ui.renderPending();
+  assert.match(ui.elements.resultContent.innerHTML,/선택 레벨 효과:<\/strong> 냄비 \+31 · 대성공 \+5%/);
+
+  search.value="무우마";search.fire("change");
+  assert.equal(ui.getSaved().pokemonId,"MISDREAVUS");
+  assert.match(ui.elements.pokemonMeta.innerHTML,/요리 파워 업S · 최대 Lv\.7/);
+  ui.renderPending();
+  assert.match(ui.elements.resultContent.innerHTML,/무우마직 진화 후 기준/);
+  assert.doesNotMatch(ui.elements.resultContent.innerHTML,/선택 레벨 효과:/);
+});
+
 test("changing Pokémon never requires erasing the previously selected name",()=>{
   const ui=appHarness(),search=ui.elements.pokemonSearch;
   assert.equal(search.value,"");
@@ -176,4 +193,5 @@ test("selecting a subskill from a locked slot swaps both positions immediately",
   assert.equal(ui.rows[4].classList.contains("locked"),true);
   assert.ok(ui.subs[4].options.every(o=>!o.disabled));
 });
+
 

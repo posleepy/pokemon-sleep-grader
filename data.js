@@ -1,9 +1,9 @@
 /* Pokémon Sleep public-stat snapshot. See THIRD_PARTY_NOTICES.md. */
 globalThis.PSG_DATA={
-  "version": "2026-10-24",
+  "version": "2026-10-26",
   "source": {
     "raenonx": "https://pks.raenonx.cc/kr",
-    "raenonxCheckedAt": "2026-10-24",
+    "raenonxCheckedAt": "2026-10-26",
     "neroliCommit": "b52bc32138ab834477b5cad70a25a952474f5f3a"
   },
   "unlocks": [
@@ -13764,7 +13764,115 @@ globalThis.PSG_DATA={
       },
       "en": "Amoonguss",
       "ko": "뽀록나"
+    },
+    {
+      "id": "MISDREAVUS",
+      "specialty": "skill",
+      "pokedexNumber": 200,
+      "ingredientPercentage": 15.0,
+      "skillPercentage": 4.7,
+      "carrySize": 13,
+      "previousEvolutions": 0,
+      "remainingEvolutions": 1,
+      "frequency": 2800,
+      "berry": "BLUK",
+      "berryValue": 26,
+      "gender": "BALANCED_GENDER",
+      "genderRatio": [
+        0.5,
+        0.5
+      ],
+      "skill": "CookingPowerUpS",
+      "finalEvolutionId": "MISMAGIUS",
+      "ingredients": {
+        "0": [
+          {
+            "id": "SOFT_POTATO",
+            "amount": 1
+          }
+        ],
+        "30": [
+          {
+            "id": "SOFT_POTATO",
+            "amount": 2
+          },
+          {
+            "id": "ROUSING_COFFEE",
+            "amount": 2
+          }
+        ],
+        "60": [
+          {
+            "id": "SOFT_POTATO",
+            "amount": 4
+          },
+          {
+            "id": "ROUSING_COFFEE",
+            "amount": 3
+          },
+          {
+            "id": "SNOOZY_TOMATO",
+            "amount": 4
+          }
+        ]
+      },
+      "en": "Misdreavus",
+      "ko": "무우마"
+    },
+    {
+      "id": "MISMAGIUS",
+      "specialty": "skill",
+      "pokedexNumber": 429,
+      "ingredientPercentage": 14.2,
+      "skillPercentage": 3.6,
+      "carrySize": 17,
+      "previousEvolutions": 1,
+      "remainingEvolutions": 0,
+      "frequency": 2400,
+      "berry": "BLUK",
+      "berryValue": 26,
+      "gender": "BALANCED_GENDER",
+      "genderRatio": [
+        0.5,
+        0.5
+      ],
+      "skill": "CookingAdvanceSMysticalFire",
+      "ingredients": {
+        "0": [
+          {
+            "id": "SOFT_POTATO",
+            "amount": 1
+          }
+        ],
+        "30": [
+          {
+            "id": "SOFT_POTATO",
+            "amount": 2
+          },
+          {
+            "id": "ROUSING_COFFEE",
+            "amount": 2
+          }
+        ],
+        "60": [
+          {
+            "id": "SOFT_POTATO",
+            "amount": 4
+          },
+          {
+            "id": "ROUSING_COFFEE",
+            "amount": 3
+          },
+          {
+            "id": "SNOOZY_TOMATO",
+            "amount": 4
+          }
+        ]
+      },
+      "en": "Mismagius",
+      "ko": "무우마직"
     }
   ]
 };
+
 
